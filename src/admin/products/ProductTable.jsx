@@ -1,35 +1,51 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Link } from "react-router-dom";
+import {
+  getAllProducts,
+  activateProduct,
+  deactivateProduct
+} from "../../Services/adminProductService.js";
 
 function ProductTable() {
 
-  // Temporary Static Data
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Classic Black Jacket",
-      gender: "Men",
-      colour: "Black",
-      active: true
-    },
-    {
-      id: 2,
-      name: "Minimal White Hoodie",
-      gender: "Women",
-      colour: "White",
-      active: false
-    }
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const toggleActive = (id) => {
-    setProducts(products.map(product =>
-      product.id === id
-        ? { ...product, active: !product.active }
-        : product
-    ));
-  };
+  useEffect(() => {
+      fetchProducts();
+    }, []);
+  
+    const fetchProducts = async () => {
+      try {
+        const res = await getAllProducts();
+        setProducts(res.data.content);
+      } catch (err) {
+        console.error("Error fetching products", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    const toggleActive = async (id, active) => {
+    try {
+      if (active) {
+        await deactivateProduct(id);
+      } else {
+        await activateProduct(id);
+      }
+        fetchProducts(); // refresh list
+      } 
+      catch (err) {
+        console.error("Error updating status", err);
+      }
+    };
+  
+  if (loading) {
+    return <div className="p-6">Loading products...</div>;
+  }
 
+  
   return (
+    
     <div className="bg-white shadow-md rounded-xl overflow-hidden border">
 
       <table className="w-full text-left">
@@ -46,7 +62,16 @@ function ProductTable() {
 
         <tbody>
 
-          {products.map((product) => (
+          {
+            products.length === 0 ? (
+            <tr>
+              <td colSpan="5" className="p-6 text-center text-gray-500">
+                No products found
+              </td>
+            </tr>)
+            : (
+
+            products.map((product) => (
             <tr
               key={product.id}
               className="border-t hover:bg-zinc-50 transition"
@@ -83,7 +108,7 @@ function ProductTable() {
                 </Link>
 
                 <button
-                  onClick={() => toggleActive(product.id)}
+                  onClick={() => toggleActive(product.id, product.active)}
                   className="text-sm text-zinc-700 hover:underline"
                 >
                   {product.active ? "Deactivate" : "Activate"}
@@ -92,6 +117,8 @@ function ProductTable() {
               </td>
 
             </tr>
+            )
+
           ))}
 
         </tbody>
