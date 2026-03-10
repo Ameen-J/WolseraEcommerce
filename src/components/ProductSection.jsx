@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { fetchProducts } from "../Services/productService";
+import { fetchProducts, searchProducts } from "../Services/productService";
 import ProductCard from "./ProductCard";
 
-function ProductSection() {
+function ProductSection({ searchTerm }) {
 
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(0);
@@ -10,18 +10,26 @@ function ProductSection() {
 
   useEffect(() => {
     loadProducts(page);
-  }, [page]);
+  }, [page, searchTerm]);
 
   const loadProducts = async (pageNumber) => {
-    try {
-      const res = await fetchProducts(pageNumber, 8);
+  try {
 
-      setProducts(res.content);
-      setTotalPages(res.totalPages);
-    } catch (err) {
-      console.error("Failed to load products", err);
+    let res;
+
+    if (searchTerm && searchTerm.trim()) {
+      res = await searchProducts({ search: searchTerm }, pageNumber, 8);
+    } else {
+      res = await fetchProducts(pageNumber, 8);
     }
-  };
+
+    setProducts(res.content);
+    setTotalPages(res.totalPages);
+
+  } catch (err) {
+    console.error("Failed to load products", err);
+  }
+};
 
   const handleAddToCart = (product) => {
     console.log("Add to cart clicked", product);

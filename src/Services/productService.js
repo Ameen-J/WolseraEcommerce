@@ -15,8 +15,8 @@ export const fetchProductById = async (id) => {
 };
 
 // Search / filter
-export const searchProducts = async (params) => {
-  const response = await axiosInstance.get(`${API_BASE}/search`, { params });
+export const searchProducts = async (params, page = 0, size = 10) => {
+  const response = await axiosInstance.get(`${API_BASE}/search?page=${page}&size=${size}`, { params });
   return response.data;
 };
 
