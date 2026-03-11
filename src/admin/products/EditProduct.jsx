@@ -1,30 +1,44 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "../AdminLayout";
 import { useNavigate, useParams } from "react-router-dom";
+import {
+  getProductById,
+  updateProduct,
+  addVariant,
+  deleteVariant,
+  addImage,
+  deleteImage
+} from "../../Services/adminProductService";
 
 function EditProduct() {
   const navigate = useNavigate();
   const { id } = useParams();
 
-  // ================= MOCK PRODUCT =================
-  const mockProducts = [
-    {
-      id: 1,
-      name: "Classic Black Jacket",
-      description: "Premium black jacket",
-      gender: "MEN",
-      colour: "Black",
-      active: true
-    },
-    {
-      id: 2,
-      name: "Minimal White Hoodie",
-      description: "Comfortable white hoodie",
-      gender: "WOMEN",
-      colour: "White",
-      active: false
-    }
-  ];
+  useEffect(() => {
+  fetchProduct();
+  }, [id]);
+
+const fetchProduct = async () => {
+  try {
+    const res = await getProductById(id);
+
+    const product = res.data;
+
+    setFormData({
+      name: product.name,
+      description: product.description,
+      gender: product.gender,
+      colour: product.colour,
+      active: product.active
+    });
+
+    setVariants(product.variants || []);
+    setImages(product.images || []);
+
+  } catch (err) {
+    console.error("Error loading product", err);
+  }
+};
 
   const [formData, setFormData] = useState({
     name: "",
@@ -35,40 +49,19 @@ function EditProduct() {
   });
 
   // ================= VARIANT STATE =================
-  const [variants, setVariants] = useState([
-    {
-      id: 1,
-      size: "M",
-      price: 1999,
-      stock: 10,
-      sku: "WOL-M-001"
-    }
-  ]);
+  const [variants, setVariants] = useState([]);
 
   const [showVariantForm, setShowVariantForm] = useState(false);
 
   const [newVariant, setNewVariant] = useState({
     size: "",
     price: "",
-    stock: "",
+    stockQuantity: "",
     sku: ""
   });
 
   // ================= IMAGE STATE =================
-  const [images, setImages] = useState([
-    {
-      id: 1,
-      imageUrl: "https://picsum.photos/id/1011/800/1000",
-      displayOrder: 1,
-      primary: true
-    },
-    {
-      id: 2,
-      imageUrl: "https://picsum.photos/id/1011/800/1000",
-      displayOrder: 2,
-      primary: false
-    }
-  ]);
+  const [images, setImages] = useState([]);
 
   const [showImageForm, setShowImageForm] = useState(false);
 
@@ -78,13 +71,6 @@ function EditProduct() {
     primary: false
   });
 
-  // ================= LOAD PRODUCT =================
-  useEffect(() => {
-    const product = mockProducts.find(p => p.id === parseInt(id));
-    if (product) {
-      setFormData(product);
-    }
-  }, [id]);
 
   // ================= PRODUCT HANDLERS =================
   const handleChange = (e) => {
@@ -95,12 +81,27 @@ function EditProduct() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Updated Product:", formData);
-    console.log("Variants:", variants);
-    console.log("Images:", images);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+
+    const payload = {
+      ...formData,
+      variants: [],
+      images: []
+    };
+
+    await updateProduct(id, payload);
+
+    alert("Product updated");
     navigate("/admin/products");
+
+  } 
+  catch (err) {
+    console.error("Update failed", err);
+    alert("Failed to update product");
+  }
   };
 
   // ================= VARIANT HANDLERS =================
@@ -109,22 +110,47 @@ function EditProduct() {
     setNewVariant({ ...newVariant, [name]: value });
   };
 
-  const handleAddVariant = () => {
-    if (!newVariant.size || !newVariant.price || !newVariant.stock || !newVariant.sku) return;
+  const handleAddVariant = async () => {
 
-    setVariants([
-      ...variants,
-      { id: Date.now(), ...newVariant }
-    ]);
+  if (!newVariant.size || !newVariant.price || !newVariant.stockQuantity || !newVariant.sku) return;
 
-    setNewVariant({ size: "", price: "", stock: "", sku: "" });
+  try {
+
+    const res = await addVariant(id, {
+      size: newVariant.size,
+      price: newVariant.price,
+      stockQuantity: newVariant.stockQuantity,
+      sku: newVariant.sku
+    });
+
+    setVariants([...variants, res.data]);
+
+    setNewVariant({
+      size: "",
+      price: "",
+      stockQuantity: "",
+      sku: ""
+    });
+
     setShowVariantForm(false);
-  };
 
-  const handleDeleteVariant = (variantId) => {
-    if (variants.length === 1) return;
+  } catch (err) {
+    console.error("Variant add failed", err);
+  }
+};
+
+  const handleDeleteVariant = async (variantId) => {
+
+  try {
+
+    await deleteVariant(variantId);
+
     setVariants(variants.filter(v => v.id !== variantId));
-  };
+
+  } catch (err) {
+    console.error("Delete variant failed", err);
+  }
+};
 
   // ================= IMAGE HANDLERS =================
   const handleImageChange = (e) => {
@@ -135,24 +161,19 @@ function EditProduct() {
     });
   };
 
-  const handleAddImage = () => {
-    if (!newImage.imageUrl) return;
+  const handleAddImage = async () => {
 
-    let updatedImages = [...images];
+  if (!newImage.imageUrl) return;
 
-    if (newImage.primary) {
-      updatedImages = updatedImages.map(img => ({
-        ...img,
-        primary: false
-      }));
-    }
+  try {
 
-    updatedImages.push({
-      id: Date.now(),
-      ...newImage
+    const res = await addImage(id, {
+      imageUrl: newImage.imageUrl,
+      displayOrder: newImage.displayOrder,
+      primary: newImage.primary
     });
 
-    setImages(updatedImages);
+    setImages([...images, res.data]);
 
     setNewImage({
       imageUrl: "",
@@ -161,10 +182,23 @@ function EditProduct() {
     });
 
     setShowImageForm(false);
-  };
 
-  const handleDeleteImage = (id) => {
-    setImages(images.filter(img => img.id !== id));
+  } catch (err) {
+    console.error("Image upload failed", err);
+  }
+};
+
+  const handleDeleteImage = async (imageId) => {
+
+  try {
+
+    await deleteImage(imageId);
+
+    setImages(images.filter(img => img.id !== imageId));
+
+  } catch (err) {
+    console.error("Delete image failed", err);
+  }
   };
 
   const handleSetPrimary = (id) => {
@@ -335,7 +369,7 @@ return (
           <div className="mt-8 grid md:grid-cols-4 gap-4">
             <input type="text" name="size" placeholder="Size" value={newVariant.size} onChange={handleVariantChange} className="border border-zinc-300 p-3 rounded-lg" />
             <input type="number" name="price" placeholder="Price" value={newVariant.price} onChange={handleVariantChange} className="border border-zinc-300 p-3 rounded-lg" />
-            <input type="number" name="stock" placeholder="Stock" value={newVariant.stock} onChange={handleVariantChange} className="border border-zinc-300 p-3 rounded-lg" />
+            <input type="number" name="stockQuantity" placeholder="Stock" value={newVariant.stock} onChange={handleVariantChange} className="border border-zinc-300 p-3 rounded-lg" />
             <input type="text" name="sku" placeholder="SKU" value={newVariant.sku} onChange={handleVariantChange} className="border border-zinc-300 p-3 rounded-lg" />
 
             <div className="md:col-span-4 flex gap-4 mt-4">
@@ -364,7 +398,56 @@ return (
             + Add Image
           </button>
         </div>
+        {showImageForm && (
+            <div className="mt-8 grid md:grid-cols-3 gap-4">
 
+              <input
+                type="text"
+                name="imageUrl"
+                placeholder="Image URL"
+                value={newImage.imageUrl}
+                onChange={handleImageChange}
+                className="border border-zinc-300 p-3 rounded-lg"
+              />
+
+              <input
+                type="number"
+                name="displayOrder"
+                placeholder="Display Order"
+                value={newImage.displayOrder}
+                onChange={handleImageChange}
+                className="border border-zinc-300 p-3 rounded-lg"
+              />
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="primary"
+                  checked={newImage.primary}
+                  onChange={handleImageChange}
+                />
+                Primary Image
+              </label>
+
+              <div className="md:col-span-3 flex gap-4 mt-4">
+                <button
+                  onClick={handleAddImage}
+                  className="bg-black text-white px-6 py-2 rounded-lg hover:bg-zinc-800 transition"
+                >
+                  Save Image
+                </button>
+
+                <button
+                  onClick={() => setShowImageForm(false)}
+                  className="bg-gray-300 px-6 py-2 rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </div>
+        )}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {images.map((img) => (
             <div key={img.id} className="relative border border-zinc-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition">

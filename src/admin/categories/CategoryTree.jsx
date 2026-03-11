@@ -1,7 +1,7 @@
 import React from "react";
 import CategoryNode from "./CategoryNode";
 
-function CategoryTree({ categories, setCategories }) {
+function CategoryTree({ categories, refreshTree }) {
 
   return (
     <div className="space-y-2">
@@ -10,7 +10,7 @@ function CategoryTree({ categories, setCategories }) {
           key={category.id}
           category={category}
           categories={categories}
-          setCategories={setCategories}
+          refreshTree={refreshTree} 
           level={0}
         />
       ))}

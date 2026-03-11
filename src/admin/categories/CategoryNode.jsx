@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { ChevronRight, Pencil, Trash2, Plus } from "lucide-react";
+import { createCategory, updateCategoryName, deleteCategory } from "../../Services/adminProductService";
 
-function CategoryNode({ category, categories, setCategories, level }) {
+function CategoryNode({ category, refreshTree, level }) {
 
   const [isOpen, setIsOpen] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -9,74 +10,44 @@ function CategoryNode({ category, categories, setCategories, level }) {
   const [isAddingChild, setIsAddingChild] = useState(false);
   const [childName, setChildName] = useState("");
 
-  // ================= UPDATE NAME =================
-  const updateCategoryName = (id, newName, nodes) => {
-    return nodes.map(node => {
-      if (node.id === id) {
-        return { ...node, name: newName };
-      }
-      if (node.children.length > 0) {
-        return {
-          ...node,
-          children: updateCategoryName(id, newName, node.children)
-        };
-      }
-      return node;
-    });
-  };
-
-  // ================= DELETE =================
-  const deleteCategory = (id, nodes) => {
-    return nodes
-      .filter(node => node.id !== id)
-      .map(node => ({
-        ...node,
-        children: deleteCategory(id, node.children)
-      }));
-  };
-
-  // ================= ADD CHILD =================
-  const addChildCategory = (id, name, nodes) => {
-    return nodes.map(node => {
-      if (node.id === id) {
-        return {
-          ...node,
-          children: [
-            ...node.children,
-            { id: Date.now(), name, children: [] }
-          ]
-        };
-      }
-      if (node.children.length > 0) {
-        return {
-          ...node,
-          children: addChildCategory(id, name, node.children)
-        };
-      }
-      return node;
-    });
-  };
-
-  const handleRename = () => {
+  const handleRename = async () => {
     if (!editName.trim()) return;
-    const updated = updateCategoryName(category.id, editName, categories);
-    setCategories(updated);
-    setIsEditing(false);
+
+    try {
+      await updateCategoryName(category.id, editName);
+      refreshTree();
+      setIsEditing(false);
+    } catch (err) {
+      console.error("Rename failed", err);
+    }
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (category.children.length > 0) return;
-    const updated = deleteCategory(category.id, categories);
-    setCategories(updated);
+
+    try {
+      await deleteCategory(category.id);
+      refreshTree();
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
-  const handleAddChild = () => {
+  const handleAddChild = async () => {
     if (!childName.trim()) return;
-    const updated = addChildCategory(category.id, childName, categories);
-    setCategories(updated);
-    setChildName("");
-    setIsAddingChild(false);
-    setIsOpen(true);
+
+    try {
+      await createCategory({
+        name: childName,
+        parentId: category.id
+      });
+
+      refreshTree();
+      setChildName("");
+      setIsAddingChild(false);
+    } catch (err) {
+      console.error("Add child failed", err);
+    }
   };
 
   return (
@@ -90,7 +61,7 @@ function CategoryNode({ category, categories, setCategories, level }) {
       >
 
         {/* ================= ARROW ================= */}
-        {category.children.length > 0 ? (
+        {category.children?.length > 0 ? (
           <button onClick={() => setIsOpen(!isOpen)}>
             <ChevronRight
               size={18}
@@ -176,12 +147,11 @@ function CategoryNode({ category, categories, setCategories, level }) {
           {/* Optional left guide line */}
           <div className="border-l border-zinc-200 ml-3 pl-3"> {/* 🔥 UPDATED */}
 
-            {category.children.map((child) => (
+            {category.children?.map((child) => (
               <CategoryNode
                 key={child.id}
                 category={child}
-                categories={categories}
-                setCategories={setCategories}
+                refreshTree={refreshTree}
                 level={level + 1}
               />
             ))}

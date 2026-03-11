@@ -1,77 +1,38 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { fetchProducts, searchProducts } from "../Services/productService";
 import ProductCard from "./ProductCard";
 
-function ProductSection() {
+function ProductSection({ searchTerm }) {
 
-  const products = [
-    {
-      id: 1,
-      name: "Classic Black Jacket",
-      category: "Men",
-      price: 1999,
-      originalPrice: 2999,
-      image: "https://picsum.photos/600/800?random=1"
-    },
-    {
-      id: 2,
-      name: "Minimal White Hoodie",
-      category: "Women",
-      price: 1499,
-      originalPrice: 2499,
-      image: "https://picsum.photos/600/800?random=2"
-    },
-    {
-      id: 3,
-      name: "Urban Street T-Shirt",
-      category: "Men",
-      price: 899,
-      originalPrice: 1599,
-      image: "https://picsum.photos/600/800?random=3"
-    },
-    {
-      id: 4,
-      name: "Elegant Summer Dress",
-      category: "Women",
-      price: 1799,
-      originalPrice: 2699,
-      image: "https://picsum.photos/600/800?random=4"
-    },
-    {
-      id: 5,
-      name: "Premium Denim Jacket",
-      category: "Men",
-      price: 2499,
-      originalPrice: 3499,
-      image: "https://picsum.photos/600/800?random=5"
-    },
-    {
-      id: 6,
-      name: "Luxury Knit Sweater",
-      category: "Women",
-      price: 1899,
-      originalPrice: 2899,
-      image: "https://picsum.photos/600/800?random=6"
-    },
-    {
-      id: 7,
-      name: "Slim Fit Formal Shirt",
-      category: "Men",
-      price: 1299,
-      originalPrice: 1999,
-      image: "https://picsum.photos/600/800?random=7"
-    },
-    {
-      id: 8,
-      name: "Modern Casual Blazer",
-      category: "Men",
-      price: 2999,
-      originalPrice: 3999,
-      image: "https://picsum.photos/600/800?random=8"
+  const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  useEffect(() => {
+    loadProducts(page);
+  }, [page, searchTerm]);
+
+  const loadProducts = async (pageNumber) => {
+  try {
+
+    let res;
+
+    if (searchTerm && searchTerm.trim()) {
+      res = await searchProducts({ search: searchTerm }, pageNumber, 8);
+    } else {
+      res = await fetchProducts(pageNumber, 8);
     }
-  ];
+
+    setProducts(res.content);
+    setTotalPages(res.totalPages);
+
+  } catch (err) {
+    console.error("Failed to load products", err);
+  }
+};
 
   const handleAddToCart = (product) => {
-    console.log("Added to cart:", product);
+    console.log("Add to cart clicked", product);
   };
 
   return (
@@ -95,24 +56,30 @@ function ProductSection() {
         {products.map((product) => (
           <ProductCard
             key={product.id}
-            product={product}
+            product={{
+              id: product.id,
+              name: product.name,
+              image: product.thumbnailUrl,
+              price: product.minPrice
+            }}
             onAddToCart={handleAddToCart}
           />
         ))}
 
       </div>
 
-      {/* Pagination (Backend Ready UI) */}
+      {/* Pagination */}
       <div className="flex justify-center mt-16 gap-3">
-        <button className="px-4 py-2 bg-zinc-800 text-white rounded-lg">
-          1
-        </button>
-        <button className="px-4 py-2 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 transition">
-          2
-        </button>
-        <button className="px-4 py-2 bg-zinc-700 text-white rounded-lg hover:bg-zinc-600 transition">
-          3
-        </button>
+        {[...Array(totalPages)].map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setPage(i)}
+            className={`px-4 py-2 rounded-lg text-white
+              ${page === i ? "bg-zinc-800" : "bg-zinc-700 hover:bg-zinc-600"}`}
+          >
+            {i + 1}
+          </button>
+        ))}
       </div>
 
     </section>

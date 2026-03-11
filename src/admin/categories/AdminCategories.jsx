@@ -1,38 +1,42 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import AdminLayout from "../AdminLayout";
 import CategoryTree from "./CategoryTree";
+import { fetchCategoryTree,
+  createCategory,
+  updateCategoryName,
+  deleteCategory
+ } from "../../Services/adminProductService";
 
 function AdminCategories() {
 
-  const [categories, setCategories] = useState([
-    {
-      id: 1,
-      name: "Clothing",
-      children: [
-        {
-          id: 2,
-          name: "Men",
-          children: [
-            { id: 3, name: "Shirts", children: [] },
-            { id: 4, name: "Jackets", children: [] }
-          ]
-        },
-        {
-          id: 5,
-          name: "Women",
-          children: [
-            { id: 6, name: "Dresses", children: [] }
-          ]
-        }
-      ]
-    }
-  ]);
+  const [categories, setCategories] = useState([]);
 
-  const addRootCategory = (name) => {
-    setCategories([
-      ...categories,
-      { id: Date.now(), name, children: [] }
-    ]);
+  useEffect(() => {
+    fetchCategories();
+    
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const res = await fetchCategoryTree();
+      setCategories(res);
+    } catch (err) {
+      console.error("Failed to load categories", err);
+    }
+  };
+
+  const addRootCategory = async (name) => {
+    try {
+      await createCategory({
+        name: name,
+        parentId: null
+      });
+
+      fetchCategories();
+    } 
+    catch (err) {
+      console.error("Create root category failed", err);
+    }
   };
 
   return (
@@ -52,7 +56,7 @@ function AdminCategories() {
 
           <CategoryTree
             categories={categories}
-            setCategories={setCategories}
+            refreshTree={fetchCategories}
           />
 
           <div className="mt-8">

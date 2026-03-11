@@ -12,6 +12,10 @@ import ProductDetails from "./pages/ProductDetails";
 import Home from "./pages/Home";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
+import Cart from "./pages/Cart";
+import Checkout from "./pages/CheckoutPage.jsx";
+import MyOrders from "./pages/MyOrders";
+import OrderDetails from "./pages/OrderDetails";
 
 import "./App.css";
 
@@ -27,6 +31,11 @@ function App() {
       <Route path="/signin" element={<Signin />} />
       <Route path="/home" element={<Home />} />
       <Route path="/product/:id" element={<ProductDetails />} />
+
+      <Route path="/cart" element={<Cart />} />
+      <Route path="/checkout" element={<Checkout />} />
+      <Route path="/orders/my-orders" element={<MyOrders />} />
+      <Route path="/orders/:id" element={<OrderDetails />} />
 
       {/* Admin Login */}
       <Route path="/admin" element={<AdminSignin />} />

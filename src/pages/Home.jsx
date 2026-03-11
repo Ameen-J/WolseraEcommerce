@@ -2,8 +2,22 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import heroImage from "../assets/hero-cloth.jpeg";
 import ProductSection from "../components/ProductSection";
+import { useState } from "react";
+import { searchProducts } from "../Services/productService";
 
 function Home() {
+  const [search, setSearch] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const handleSearch = (search) => {
+    try {
+      setSearchTerm(search);
+    }
+    catch (err) {
+      console.error("Search failed", err);
+    }
+  };
+
   return (
     <div className="w-full">
 
@@ -37,12 +51,15 @@ function Home() {
               className="w-full py-4 px-6 rounded-full bg-white/90 text-black 
                          focus:outline-none focus:ring-2 focus:ring-white 
                          text-lg shadow-xl"
+              value = {search}
+              onChange={(e) => setSearch(e.target.value)}
             />
 
             <button
               className="absolute right-2 top-1/2 -translate-y-1/2 
                          bg-black text-white px-6 py-2 rounded-full 
                          hover:bg-zinc-800 transition duration-300 cursor-pointer"
+              onClick={() => handleSearch(search)}
             >
               Search
             </button>
@@ -52,7 +69,7 @@ function Home() {
       </div>
 
       {/* PRODUCT SECTION BELOW HERO */}
-      <ProductSection />
+      <ProductSection searchTerm = {searchTerm}/>
 
     </div>
   );

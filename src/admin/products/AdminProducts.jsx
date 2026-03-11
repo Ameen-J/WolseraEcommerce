@@ -2,6 +2,7 @@ import React from "react";
 import AdminLayout from "../AdminLayout";
 import ProductTable from "./ProductTable";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 function AdminProducts() {
   return (
