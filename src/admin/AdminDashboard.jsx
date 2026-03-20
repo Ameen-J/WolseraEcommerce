@@ -1,6 +1,6 @@
 import React from "react";
 import AdminLayout from "./AdminLayout";
-import logo from "../assets/logo.png";
+import logo from "../assets/Loadingwolf.png";
 
 function AdminDashboard() {
   return (

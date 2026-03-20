@@ -344,7 +344,7 @@ return (
                 <tr key={variant.id} className="border-t border-zinc-200">
                   <td className="p-3">{variant.size}</td>
                   <td className="p-3">₹{variant.price}</td>
-                  <td className="p-3">{variant.stock}</td>
+                  <td className="p-3">{variant.stockQuantity}</td>
                   <td className="p-3">{variant.sku}</td>
                   <td className="p-3">
                     <button

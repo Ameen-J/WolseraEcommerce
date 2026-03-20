@@ -1,13 +1,13 @@
 import { useCart } from "../context/CartContext";
-import { Trash2 } from "lucide-react";
+import { Trash2, ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import Footer from "../components/Footer";
 
 function Cart() {
   const {
     cartItems,
     cartTotal,
-    removeItem,
+    removeFromCart,
     updateQuantity,
     clearCart,
     checkout
@@ -16,153 +16,195 @@ function Cart() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-white px-6 py-16">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen flex flex-col bg-zinc-950 text-white">
 
-        {/* Header */}
-        <div className="pb-6 border-b border-gray-200">
-            <h1 className="text-3xl md:text-4xl">
-                Shopping Bag
-             </h1>
+      <main className="flex-grow px-10 py-16">
 
-            <p className="text-gray-500 mt-2">
-                {cartItems.length} items added to your bag
-             </p>
+        <div className="max-w-7xl mx-auto grid lg:grid-cols-3 gap-12 pb-30">
+
+          {/* LEFT SIDE CART ITEMS */}
+          <div className="lg:col-span-2">
+
+            {/* 🔥 FIXED TITLE SECTION */}
+            <div className="mb-10 text-center">
+
+              <div className="flex items-center justify-center gap-4">
+                <ShoppingCart 
+                  className="text-[#9257c3] drop-shadow-[0_0_8px_#9257c3]" 
+                  size={32} 
+                />
+                <h1 className="text-4xl font-bold tracking-[0.1em]">
+                  SHOPPING CART
+                </h1>
+              </div>
+
+              {/* Underline */}
+              <div className="w-30 h-[2px] bg-[#9257c3] mt-4 mx-auto"></div>
+
+            </div>
+
+            {cartItems.length === 0 ? (
+              <p className="text-gray-400">
+                Your cart is empty.
+              </p>
+            ) : (
+
+              <div className="space-y-10">
+
+                {cartItems.map((item) => (
+
+                  <div
+                    key={item.cartItemId}
+                    className="flex justify-between items-center border-b border-gray-800 pb-8"
+                  >
+
+                    {/* PRODUCT INFO */}
+                    <div className="flex gap-6">
+
+                      <img
+                        src={item.imageUrls?.[0]}
+                        alt={item.productName}
+                        className="w-24 h-24 object-cover rounded-lg"
+                      />
+
+                      <div>
+
+                        <h2 className="text-lg font-semibold">
+                          {item.productName}
+                        </h2>
+
+                        <p className="text-gray-400 text-sm mt-1">
+                          Size: {item.size} | Color: {item.color}
+                        </p>
+
+                        {/* REMOVE */}
+                        <button
+                          onClick={() => removeFromCart(item.cartItemId)}
+                          className="flex items-center gap-1 text-red-500 text-sm mt-3 hover:text-red-400"
+                        >
+                          <Trash2 size={16} />
+                          Remove
+                        </button>
+
+                      </div>
+
+                    </div>
+
+
+                    {/* QUANTITY */}
+                    <div className="flex items-center gap-4">
+
+                      <button
+                        onClick={() =>
+                          updateQuantity(
+                            item.cartItemId,
+                            item.quantity > 1 ? item.quantity - 1 : 1
+                          )
+                        }
+                        className="w-10 h-10 rounded-md bg-[#1e293b] hover:bg-[#334155]"
+                      >
+                        -
+                      </button>
+
+                      <span className="w-8 text-center">
+                        {item.quantity}
+                      </span>
+
+                      <button
+                        onClick={() =>
+                          updateQuantity(
+                            item.cartItemId,
+                            item.quantity + 1
+                          )
+                        }
+                        className="w-10 h-10 rounded-md bg-[#1e293b] hover:bg-[#334155]"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+
+                    {/* PRICE */}
+                    <div className="text-lg font-semibold">
+                      ₹{item.total}
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+            )}
+
+            {/* CART ACTIONS */}
+            <div className="flex gap-6 mt-12">
+
+              <button
+                onClick={clearCart}
+                className="bg-red-600 px-6 py-3 rounded-lg hover:bg-red-700"
+              >
+                Clear Cart
+              </button>
+
+              <button
+                onClick={() => navigate("/home")}
+                className="border border-gray-500 px-6 py-3 rounded-lg hover:bg-gray-800"
+              >
+                Continue Shopping
+              </button>
+
+            </div>
+
+          </div>
+
+
+
+          {/* ORDER SUMMARY */}
+          <div className="bg-[#0f172a] rounded-2xl p-8 h-fit shadow-lg">
+
+            <h2 className="text-2xl font-semibold mb-6">
+              Order Summary
+            </h2>
+
+            <div className="space-y-4 text-gray-300">
+
+              <div className="flex justify-between">
+                <span>Subtotal</span>
+                <span>₹{cartTotal}</span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Shipping</span>
+                <span className="text-green-400">Free</span>
+              </div>
+
+              <div className="border-t border-gray-700 pt-4 flex justify-between text-xl font-semibold text-white">
+                <span>Total</span>
+                <span>₹{cartTotal}</span>
+              </div>
+
+            </div>
+
+            {/* CHECKOUT BUTTON */}
+            <button
+              onClick={() => navigate("/checkout")}
+              className="mt-8 w-full py-3 rounded-xl font-semibold
+              bg-gradient-to-r from-blue-500 to-purple-600
+              hover:opacity-90 hover:shadow-lg hover:shadow-blue-500/30
+              transition"
+            >
+              Proceed to Checkout →
+            </button>
+
+          </div>
+
         </div>
 
-        {cartItems.length === 0 ? (
-          <p className="text-gray-500 mt-10">
-            Your Bag is empty.
-          </p>
-        ) : (
-          <>
-            {/* Items */}
-            <div className="divide-y divide-gray-200">
+      </main>
 
-              {cartItems.map((item) => (
-                <div
-                  key={item.cartItemId}
-                  className="py-10 flex justify-between items-start"
-                >
+      <Footer />
 
-                  {/* LEFT */}
-                  <div className="flex gap-8">
-                    <img
-                      src={item.imageUrls?.[0]}
-                      alt={item.productName}
-                      className="w-36 h-44 object-cover rounded-xl"
-                    />
-
-                    <div>
-                      <h2 className="text-2xl mb-3">
-                        {item.productName}
-                      </h2>
-
-                      <p className="text-gray-500 mb-2">
-                        Size: {item.size} | Color: {item.color}
-                      </p>
-
-                      {/* Quantity */}
-                      <div className="flex items-center gap-4 mt-6">
-                        <button
-                          onClick={() =>
-                            updateQuantity(
-                              item.cartItemId,
-                              item.quantity > 1
-                                ? item.quantity - 1
-                                : 1
-                            )
-                          }
-                          className="px-4 py-2 border border-black"
-                        >
-                          -
-                        </button>
-
-                        <span className="text-lg">
-                          {item.quantity}
-                        </span>
-
-                        <button
-                          onClick={() =>
-                            updateQuantity(
-                              item.cartItemId,
-                              item.quantity + 1
-                            )
-                          }
-                          className="px-4 py-2 border border-black"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* RIGHT */}
-                  <div className="flex flex-col items-end gap-6">
-                    <span className="text-xl font-semibold">
-                      ₹{item.total}
-                    </span>
-
-                    <button
-                      onClick={() =>
-                        removeItem(item.cartItemId)
-                      }
-                      className="text-gray-500 hover:text-red-600 transition"
-                    >
-                      <Trash2 size={22} />
-                    </button>
-                  </div>
-
-                </div>
-              ))}
-
-            </div>
-
-            {/* Action Row */}
-            <div className="mt-12 flex justify-between items-start">
-
-                {/* LEFT ACTIONS */}
-                <div className="flex flex-col gap-4">
-
-                <button
-                onClick={clearCart}
-                className="bg-red-600 text-white px-8 py-3 rounded-lg
-                            hover:bg-red-700 transition duration-300"
-                >
-                Clear Cart
-                </button>
-
-                <button
-                onClick={() => navigate("/home")}
-                className="border border-black px-8 py-3 rounded-lg
-                            hover:bg-zinc-100 transition duration-300"
-                >
-                Continue Shopping
-                </button>
-
-                </div>
-
-                {/* RIGHT ACTIONS */}
-                <div className="flex flex-col items-end gap-6">
-
-                <div className="text-2xl font-semibold">
-                Subtotal ₹{cartTotal}
-                </div>
-
-                <button
-                onClick={() => navigate("/checkout")}
-                className="bg-black text-white px-10 py-3 rounded-lg
-                            hover:bg-zinc-800 transition duration-300"
-                >
-                Proceed to Checkout
-                </button>
-
-                </div>
-
-            </div>
-          </>
-        )}
-      </div>
     </div>
   );
 }
