@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, Key } from "lucide-react";
 import { adminLogin } from "../Services/authService";
+import adminImage from "../assets/AdminImg2.png";
+import { motion } from "framer-motion";
 
 function AdminSignin() {
   const navigate = useNavigate();
@@ -14,7 +16,6 @@ function AdminSignin() {
 
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-
 
   const handleChange = (e) => {
     setFormData({
@@ -32,11 +33,15 @@ function AdminSignin() {
 
       const token = response.data;
 
-      // Store token and role
       localStorage.setItem("token", token);
       localStorage.setItem("role", "ADMIN");
 
-      navigate("/admin/dashboard");
+      navigate("/loading", {
+        state: {
+          message: "Preparing Admin Dashboard...",
+          redirect: "/admin/dashboard"
+        }
+      });
 
     } catch (err) {
       setError("Invalid credentials or secret key");
@@ -44,72 +49,168 @@ function AdminSignin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
-      <div className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md border-4 border-zinc-900">
+    <div className="min-h-screen grid lg:grid-cols-2 bg-[#020617]">
 
-        <h2 className="text-3xl font-bold text-center mb-6">
-          ADMIN SIGN IN
-        </h2>
+      {/* LEFT SIDE FORM */}
+      <motion.div
+        initial={{ opacity: 0, y: 60 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="flex items-center justify-center px-10 pt-12 pb-7"
+      >
 
-        {error && (
-          <p className="text-red-500 text-center mb-4">{error}</p>
-        )}
+        <div className="w-full max-w-sm text-white">
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+          <h2 className="text-2xl font-bold mb-2">
+            Admin Access
+          </h2>
 
-          <input
-            type="email"
-            name="email"
-            placeholder="Admin Email"
-            onChange={handleChange}
-            className="w-full p-3 border border-zinc-900 rounded-lg"
-          />
+          <p className="text-gray-400 mb-8 text-sm">
+            Sign in to manage the Wolsera platform.
+          </p>
 
-          <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className="w-full p-3 border border-zinc-900 rounded-lg pr-12 focus:outline-none focus:ring-2 focus:ring-zinc-900"
-              />
+          {error && (
+            <p className="text-red-400 text-center mb-4">
+              {error}
+            </p>
+          )}
 
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-900 transition cursor-pointer"
-              >
-                {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-              </button>
+          <form onSubmit={handleSubmit} className="space-y-5">
+
+            {/* EMAIL */}
+            <div>
+              <label className="text-sm text-gray-300">
+                Admin Email
+              </label>
+
+              <div className="relative mt-2">
+
+                <Mail className="absolute left-3 top-3 text-gray-400" size={18} />
+
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="admin@wolsera.com"
+                  onChange={handleChange}
+                  className="w-full pl-10 py-2.5 rounded-xl bg-[#0f172a] border border-[#1e293b]
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+              </div>
             </div>
 
+            {/* PASSWORD */}
+            <div>
+              <label className="text-sm text-gray-300">
+                Password
+              </label>
 
-          <input
-            type="text"
-            name="secretKey"
-            placeholder="Secret Key"
-            onChange={handleChange}
-            className="w-full p-3 border border-zinc-900 rounded-lg"
-          />
+              <div className="relative mt-2">
 
-          <button type="submit" className="w-full bg-zinc-900 text-white py-3 rounded-xl 
-           hover:bg-zinc-800 
-           transition duration-300 
-           cursor-pointer">
-            Admin Login
-          </button>
+                <Lock className="absolute left-3 top-3 text-gray-400" size={18} />
 
-        </form>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  placeholder="••••••••"
+                  value={formData.password}
+                  onChange={handleChange}
+                  className="w-full pl-10 py-2.5 rounded-xl bg-[#0f172a] border border-[#1e293b]
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12"
+                />
 
-        <p className="text-sm text-center mt-6">
-          Go back to{" "}
-          <Link to="/signin" className="underline text-zinc-900">
-            User Sign In
-          </Link>
-        </p>
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-3 text-gray-400 cursor-pointer"
+                >
+                  {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+                </button>
+
+              </div>
+            </div>
+
+            {/* SECRET KEY */}
+            <div>
+              <label className="text-sm text-gray-300">
+                Secret Key
+              </label>
+
+              <div className="relative mt-2">
+
+                <Key className="absolute left-3 top-3 text-gray-400" size={18} />
+
+                <input
+                  type="text"
+                  name="secretKey"
+                  placeholder="Enter the Key"
+                  onChange={handleChange}
+                  className="w-full pl-10 py-2.5 rounded-xl bg-[#0f172a] border border-[#1e293b]
+                  focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+
+              </div>
+            </div>
+
+            {/* BUTTON */}
+            <button
+              type="submit"
+              className="w-full py-2.5 rounded-xl font-semibold text-white
+              bg-gradient-to-r from-blue-500 to-purple-600
+              hover:opacity-90 hover:shadow-lg hover:shadow-blue-500/30
+              active:scale-95 transition duration-200"
+            >
+              Admin Login
+            </button>
+
+          </form>
+
+          <p className="text-sm text-center mt-6 text-gray-400">
+            Go back to{" "}
+            <Link
+              to="/signin"
+              className="text-blue-400 hover:underline underline-offset-4 transition"
+            >
+              User Sign In
+            </Link>
+          </p>
+
+        </div>
+
+      </motion.div>
+
+
+      {/* RIGHT SIDE IMAGE */}
+      <div className="hidden lg:block relative">
+
+        <img
+          src={adminImage}
+          alt="Admin Login"
+          className="absolute w-full h-full object-cover"
+        />
+
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Animated Text */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+          className="relative z-10 flex flex-col justify-end h-full p-16 text-white"
+        >
+
+          <h2 className="text-4xl font-bold mb-4">
+            Manage Wolsera Platform.
+          </h2>
+
+          <p className="text-gray-300 max-w-md">
+            Access the admin dashboard to control products, categories, and platform operations.
+          </p>
+
+        </motion.div>
 
       </div>
+
     </div>
   );
 }

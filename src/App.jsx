@@ -18,17 +18,22 @@ import MyOrders from "./pages/MyOrders";
 import OrderDetails from "./pages/OrderDetails";
 
 import "./App.css";
+import Loading from "./pages/Loading.jsx";
+import ForgotPassword from "./pages/ForgotPassword.jsx";
+import ResetPassword from "./pages/ResetPassword.jsx";
 
 function App() {
   return (
     <Routes>
 
       {/* Default */}
-      <Route path="/" element={<Navigate to="/signup" />} />
+      <Route path="/" element={<Navigate to="/home" />} />
 
       {/* User Routes */}
       <Route path="/signup" element={<Signup />} />
       <Route path="/signin" element={<Signin />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/home" element={<Home />} />
       <Route path="/product/:id" element={<ProductDetails />} />
 
@@ -39,7 +44,8 @@ function App() {
 
       {/* Admin Login */}
       <Route path="/admin" element={<AdminSignin />} />
-
+      {/* Loading Screen */}
+      <Route path="/loading" element={<Loading />} />
       {/* Protected Admin Routes */}
       <Route
         path="/admin/dashboard"

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { fetchProducts, searchProducts } from "../Services/productService";
 import ProductCard from "./ProductCard";
+import { ShoppingBag } from "lucide-react";
 
 function ProductSection({ searchTerm }) {
 
@@ -39,12 +40,22 @@ function ProductSection({ searchTerm }) {
   return (
     <section className="bg-zinc-950 py-20 px-4 md:px-8">
 
+      
       {/* Title */}
       <div className="text-center mb-14">
-        <h2 className="text-3xl md:text-4xl font-bold text-white tracking-[0.3em]">
-          WOLSERA COLLECTION
-        </h2>
-        <div className="w-24 h-[2px] bg-white mx-auto mt-4"></div>
+
+        <div className="flex items-center justify-center gap-4">
+          <ShoppingBag 
+            className="text-[#9257c3] drop-shadow-[0_0_8px_#9257c3]" 
+            size={28} 
+          />
+          <h2 className="text-3xl md:text-4xl font-bold text-white tracking-[0.3em]">
+            WOLSERA COLLECTION
+          </h2>
+        </div>
+
+        <div className="w-50 h-[2px] bg-[#9257c3] mx-auto mt-4"></div>
+
       </div>
 
       {/* Grid */}
