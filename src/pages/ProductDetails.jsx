@@ -59,6 +59,7 @@ function ProductDetails() {
     else navigate("/payment");
   };
 
+  console.log(product);
   return (
     <div className="min-h-screen bg-white px-6 py-16">
 
